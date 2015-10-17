@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 
 namespace _2_lab
 {
@@ -58,11 +59,11 @@ namespace _2_lab
             for (long i = 0; i < localFile.Length; i++)
             {
                 temp = Convert.ToByte(localFile.ReadByte());
-                textBox2.Text = textBox2.Text + Convert.ToString(temp);
                 temp = testEncrypt(temp);
-                textBox3.Text = textBox3.Text + Convert.ToString(temp);
                 newFile.WriteByte(Convert.ToByte(temp));
             }
+
+            Debug.WriteLine();
             localFile.Close();
             newFile.Close();
             MessageBox.Show("OK");
