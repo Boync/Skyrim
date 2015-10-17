@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace _2_lab
 {
@@ -34,38 +35,49 @@ namespace _2_lab
 
         }
 
-        public byte testEncrypt(byte sByte)
+        public void Encrypt(string inputFile, string outputFile)
         {
-
-            sByte = (byte)(sByte * 2);
-            return sByte;
+            using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+            {
+                FileStream fstreamIn = new FileStream(inputFile, FileMode.Open, FileAccess.Read);
+                FileStream fstreamOut = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
+                byte[] buf = new byte[64];
+                for (; ; )
+                {
+                    int bytesRead = fstreamIn.Read(buf, 0, buf.Length);
+                    if (bytesRead == 0) break;
+                    byte[] encrypted = bytesRead == buf.Length ? rsa.Encrypt(buf, true) : rsa.Encrypt(buf.Take(bytesRead).ToArray(), true);
+                    fstreamOut.Write(encrypted, 0, encrypted.Length);
+                }
+            }
 
         }
 
-        public byte testDecrypt(byte sByte)
+        void Decrypt(string inputFile, string outputFile)
         {
+            using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+            {
+                //rsa.ImportParameters(rsaPrivateKey);
 
-            sByte = (byte)(sByte / 2);
-            return sByte;
-
+                FileStream fstreamIn = new FileStream(inputFile, FileMode.Open, FileAccess.Read);
+                FileStream fstreamOut = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
+                {
+                    byte[] buf = new byte[128];
+                    for (; ; )
+                    {
+                        int bytesRead = fstreamIn.Read(buf, 0, buf.Length);
+                        if (bytesRead == 0) break;
+                        byte[] decrypted = rsa.Decrypt(buf, true);
+                        fstreamOut.Write(decrypted, 0, decrypted.Length);
+                    }
+                }
+            }
         }
 
         private void button_encrypt_Click(object sender, EventArgs e)
         {
 
-            byte temp;
-            FileStream localFile = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read);
-            FileStream newFile = new FileStream(openFileDialog1.FileName + ".crypt", FileMode.Create);
-            for (long i = 0; i < localFile.Length; i++)
-            {
-                temp = Convert.ToByte(localFile.ReadByte());
-                temp = testEncrypt(temp);
-                newFile.WriteByte(Convert.ToByte(temp));
-            }
-
-            Debug.WriteLine();
-            localFile.Close();
-            newFile.Close();
+            Encrypt(openFileDialog1.FileName, openFileDialog1.FileName + ".crypt");
             MessageBox.Show("OK");
         }
 
@@ -78,7 +90,7 @@ namespace _2_lab
             for (long i = 0; i < localFile.Length; i++)
             {
                 temp = Convert.ToByte(localFile.ReadByte());
-                temp = testDecrypt(temp);
+                temp = teDecrypt(temp);
                 newFile.WriteByte(Convert.ToByte(temp));
             }
             localFile.Close();
