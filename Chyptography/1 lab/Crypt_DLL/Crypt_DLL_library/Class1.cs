@@ -3,27 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
 
 namespace Crypt_DLL_library
 {
     public class Crypt
     {
-        public static long power_mod(long a, long x, long m)
-        {
-            // y = a^x mod m
-            long y = 1;
-            for (long i = 1; i < x + 1; i++)
-            {
-                y = (y * a) % m;
-            }
-            return y;
-        }
 
-        public static void evklid(long a, long b, ref long x, ref long y, ref long d)
+        public static void evklid(BigInteger a, BigInteger b, ref BigInteger x, ref BigInteger y, ref BigInteger d)
         {
-            long q, r;
-            long x1 = 0, x2 = 1, y1 = 1, y2 = 0;
-            //long d, x, y; //results
+            BigInteger q, r;
+            BigInteger x1 = 0, x2 = 1, y1 = 1, y2 = 0;
+            //BigInteger d, x, y; //results
             if (b == 0) { d = a; x = 1; y = 0; }
             while (b > 0)
             {
@@ -44,14 +35,16 @@ namespace Crypt_DLL_library
             y = y2;
         }
 
-        public static void diffi_hellman(long p, long a, long x1, long x2, ref long z1, ref long z2)
+        public static void diffi_hellman(BigInteger p, BigInteger a, BigInteger x1, BigInteger x2, ref BigInteger z1, ref BigInteger z2)
         {
-            long y1 = power_mod(a, x1, p);
+            BigInteger y1 = new BigInteger();
+            BigInteger y2 = new BigInteger();
+            y1 = BigInteger.ModPow(a,x1,p);
             //textBox_y1.Text = Convert.ToString(y1);
-            long y2 = power_mod(a, x2, p);
+            y2 = BigInteger.ModPow(a, x2, p);
             //textBox_y2.Text = Convert.ToString(y2);
-            z1 = power_mod(y2, x1, p);
-            z2 = power_mod(y1, x2, p);
+            z1 = BigInteger.ModPow(y2, x1, p);
+            z2 = BigInteger.ModPow(y1, x2, p);
         }
     }
 }

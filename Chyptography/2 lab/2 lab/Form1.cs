@@ -20,6 +20,10 @@ namespace _2_lab
             InitializeComponent();
         }
 
+       // RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+       // rsaPrivateKey = rsa.ExportParameters(true);//экспорт закрытого ключа
+       // rsaOpenKey = rsa.ExportParameters(false);//экспорт открытого ключа
+
         private void button_view_Click(object sender, EventArgs e)
         {
             
@@ -29,7 +33,7 @@ namespace _2_lab
             {
 
                 textBox_filepath.Text = openFileDialog1.FileName;
-                textBox1.Text = Convert.ToString(openFileDialog1.FileName.Length);
+                //textBox1.Text = Convert.ToString(openFileDialog1.FileName.Length);
             
             }
 
@@ -37,70 +41,59 @@ namespace _2_lab
 
         public void Encrypt(string inputFile, string outputFile)
         {
-            using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+            long temp = 0;
+            FileStream streamIn = new FileStream(inputFile, FileMode.Open, FileAccess.Read);
+            FileStream streamOut = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
+            BinaryReader binIn = new BinaryReader(streamIn);
+            BinaryWriter binOut = new BinaryWriter(streamOut);
+            for (long i = 1; i <= streamIn.Length / 8; i++)
             {
-                FileStream fstreamIn = new FileStream(inputFile, FileMode.Open, FileAccess.Read);
-                FileStream fstreamOut = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
-                byte[] buf = new byte[64];
-                for (; ; )
-                {
-                    int bytesRead = fstreamIn.Read(buf, 0, buf.Length);
-                    if (bytesRead == 0) break;
-                    byte[] encrypted = bytesRead == buf.Length ? rsa.Encrypt(buf, true) : rsa.Encrypt(buf.Take(bytesRead).ToArray(), true);
-                    fstreamOut.Write(encrypted, 0, encrypted.Length);
-                }
+
+                temp = binIn.ReadInt64();
+                temp = temp * 2;
+                binOut.Write(temp);
             }
 
+            binIn.Close();
+            binOut.Close();
+            streamIn.Close();
+            streamOut.Close();
+            
         }
 
-        void Decrypt(string inputFile, string outputFile)
+        public void Decrypt(string inputFile, string outputFile)
         {
-            using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+
+            long temp = 0;
+            FileStream streamIn = new FileStream(inputFile, FileMode.Open, FileAccess.Read);
+            FileStream streamOut = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
+            BinaryReader binIn = new BinaryReader(streamIn);
+            BinaryWriter binOut = new BinaryWriter(streamOut);
+            for (long i = 1; i <= streamIn.Length / 8; i++)
             {
-                //rsa.ImportParameters(rsaPrivateKey);
 
-                FileStream fstreamIn = new FileStream(inputFile, FileMode.Open, FileAccess.Read);
-                FileStream fstreamOut = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
-                {
-                    byte[] buf = new byte[128];
-                    for (; ; )
-                    {
-                        int bytesRead = fstreamIn.Read(buf, 0, buf.Length);
-                        if (bytesRead == 0) break;
-                        byte[] decrypted = rsa.Decrypt(buf, true);
-                        fstreamOut.Write(decrypted, 0, decrypted.Length);
-                    }
-                }
+                temp = binIn.ReadInt64();
+                temp = temp / 2;
+                binOut.Write(temp);
             }
+
+            binIn.Close();
+            binOut.Close();
+            streamIn.Close();
+            streamOut.Close();
+            
+
+            
         }
 
-        private void button_encrypt_Click(object sender, EventArgs e)
+
+        private void button_run_Click(object sender, EventArgs e)
         {
 
-            Encrypt(openFileDialog1.FileName, openFileDialog1.FileName + ".crypt");
+           if (comboBox_crypt.SelectedItem == "Encrypt") Encrypt(openFileDialog1.FileName, openFileDialog1.FileName + ".crypt");
+           else if (comboBox_crypt.SelectedItem == "Decrypt") Decrypt(openFileDialog1.FileName, openFileDialog1.FileName.Remove(openFileDialog1.FileName.Length - 6) + "(1)");
             MessageBox.Show("OK");
         }
-
-        private void button_decrypt_Click(object sender, EventArgs e)
-        {
-
-            byte temp;
-            FileStream localFile = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read);
-            FileStream newFile = new FileStream("test.jpg", FileMode.Create);
-            for (long i = 0; i < localFile.Length; i++)
-            {
-                temp = Convert.ToByte(localFile.ReadByte());
-                temp = teDecrypt(temp);
-                newFile.WriteByte(Convert.ToByte(temp));
-            }
-            localFile.Close();
-            newFile.Close();
-            MessageBox.Show("OK");
-        }
-
-
-
-
 
 
     }
